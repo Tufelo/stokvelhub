@@ -88,3 +88,43 @@ In many communities, informal savings groups lack digital tracking, leading to:
 ---
 
 ## 📂 Project Structure
+
+stokvelhub/
+├── backend/
+│ ├── src/
+│ │ ├── controllers/
+│ │ ├── services/
+│ │ ├── routes/
+│ │ ├── middleware/
+│ │ ├── db/
+│ │ ├── app.ts
+│ │ └── server.ts
+│ ├── package.json
+│ └── tsconfig.json
+├── frontend/
+│ ├── src/
+│ │ ├── pages/
+│ │ ├── services/
+│ │ ├── context/
+│ │ ├── theme.ts
+│ │ ├── App.tsx
+│ │ └── index.tsx
+│ ├── package.json
+│ └── tsconfig.json
+└── README.md
+
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v20.x or higher)
+- npm or yarn
+
+### Installation
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/Tufelo/stokvelhub.git
+cd stokvelhub
