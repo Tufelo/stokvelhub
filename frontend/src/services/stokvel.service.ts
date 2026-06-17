@@ -27,7 +27,6 @@ export interface Contribution {
 }
 
 export const stokvelService = {
-  // Stokvel CRUD
   async getAll(): Promise<Stokvel[]> {
     const response = await api.get('/stokvels');
     return response.data.data;
@@ -52,7 +51,6 @@ export const stokvelService = {
     await api.delete(`/stokvels/${id}`);
   },
 
-  // Members
   async getMembers(stokvelId: string): Promise<Member[]> {
     const response = await api.get(`/stokvels/${stokvelId}/members`);
     return response.data.data;
@@ -67,7 +65,6 @@ export const stokvelService = {
     await api.delete(`/stokvels/${stokvelId}/members/${memberId}`);
   },
 
-  // Contributions
   async addContribution(stokvelId: string, memberId: string, amount: number, dueDate: string): Promise<any> {
     const response = await api.post(`/stokvels/${stokvelId}/contributions`, { memberId, amount, dueDate });
     return response.data.data;
@@ -78,7 +75,6 @@ export const stokvelService = {
     return response.data.data;
   },
 
-  // Payouts
   async getNextRecipient(stokvelId: string): Promise<any> {
     const response = await api.get(`/stokvels/${stokvelId}/payouts/next`);
     return response.data.data;

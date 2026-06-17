@@ -5,7 +5,6 @@ import authRoutes from "./routes/auth.routes";
 import stokvelRoutes from "./routes/stokvel.routes";
 import { initializeDatabase } from "./db/database";
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
@@ -13,8 +12,16 @@ const app = express();
 // Initialize database
 initializeDatabase();
 
-// Middleware
-app.use(cors());
+// CORS configuration
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.FRONTEND_URL || 'https://stokvelhub.vercel.app', 'http://localhost:3000']
+  : ['http://localhost:3000'];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Health check
@@ -22,7 +29,8 @@ app.get("/api/health", (req, res) => {
   res.json({ 
     status: "OK", 
     timestamp: new Date().toISOString(),
-    database: "SQLite"
+    database: "SQLite",
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -35,6 +43,7 @@ app.get("/", (req, res) => {
   res.json({
     message: "Welcome to StokvelHub API",
     version: "1.0.0",
+    status: "running",
     endpoints: {
       health: "GET /api/health",
       auth: {

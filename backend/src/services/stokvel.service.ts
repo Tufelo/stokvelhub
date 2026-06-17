@@ -22,7 +22,6 @@ export interface CreateStokvelInput {
 }
 
 export class StokvelService {
-  // Create a new stokvel
   static create(userId: string, input: CreateStokvelInput): Stokvel {
     const db = getDb();
     
@@ -56,7 +55,6 @@ export class StokvelService {
     return stokvel;
   }
   
-  // Get all stokvels for a user
   static getUserStokvels(userId: string): any[] {
     const db = getDb();
     
@@ -76,7 +74,6 @@ export class StokvelService {
     return stmt.all(userId);
   }
   
-  // Get single stokvel by ID (with members)
   static getById(stokvelId: string, userId: string): any {
     const db = getDb();
     
@@ -117,7 +114,6 @@ export class StokvelService {
     };
   }
   
-  // Update stokvel settings
   static update(stokvelId: string, userId: string, updates: Partial<CreateStokvelInput>): Stokvel {
     const db = getDb();
     
@@ -175,7 +171,6 @@ export class StokvelService {
     return updated;
   }
   
-  // Delete stokvel
   static delete(stokvelId: string, userId: string): void {
     const db = getDb();
     
@@ -197,7 +192,6 @@ export class StokvelService {
     db.prepare('DELETE FROM stokvels WHERE id = ?').run(stokvelId);
   }
 
-  // Clone stokvel
   static clone(stokvelId: string, userId: string): Stokvel {
     const db = getDb();
     
@@ -252,7 +246,6 @@ export class StokvelService {
     return clonedStokvel;
   }
 
-  // Add member to stokvel
   static addMember(stokvelId: string, userId: string, email: string, role: string = 'MEMBER'): any {
     const db = getDb();
     
@@ -318,7 +311,6 @@ export class StokvelService {
     return newMember;
   }
 
-  // Remove member from stokvel
   static removeMember(stokvelId: string, userId: string, memberId: string): void {
     const db = getDb();
     
@@ -362,7 +354,6 @@ export class StokvelService {
     }));
   }
 
-  // Update member role
   static updateMemberRole(stokvelId: string, userId: string, memberId: string, newRole: string): void {
     const db = getDb();
     
@@ -403,7 +394,6 @@ export class StokvelService {
     }));
   }
 
-  // Get all members of a stokvel
   static getMembers(stokvelId: string, userId: string): any[] {
     const db = getDb();
     
@@ -436,7 +426,6 @@ export class StokvelService {
     return members;
   }
 
-  // Add contribution
   static addContribution(stokvelId: string, userId: string, memberId: string, amount: number, dueDate: string): any {
     const db = getDb();
     
@@ -490,7 +479,6 @@ export class StokvelService {
     return contribution;
   }
 
-  // Get all contributions
   static getContributions(stokvelId: string, userId: string): any[] {
     const db = getDb();
     
@@ -521,7 +509,6 @@ export class StokvelService {
     return contributions;
   }
 
-  // Get member contributions
   static getMemberContributions(stokvelId: string, userId: string, memberId: string): any {
     const db = getDb();
     
@@ -576,7 +563,6 @@ export class StokvelService {
     };
   }
 
-  // Update contribution status
   static updateContributionStatus(contributionId: string, userId: string, status: string): any {
     const db = getDb();
     
@@ -624,7 +610,6 @@ export class StokvelService {
     return updated;
   }
 
-  // Get next recipient for payout
   static getNextRecipient(stokvelId: string, userId: string): any {
     const db = getDb();
     
@@ -687,7 +672,6 @@ export class StokvelService {
     };
   }
 
-  // Process payout
   static processPayout(stokvelId: string, userId: string): any {
     const db = getDb();
     
@@ -756,7 +740,6 @@ export class StokvelService {
     };
   }
 
-  // Get payout history
   static getPayoutHistory(stokvelId: string, userId: string): any[] {
     const db = getDb();
     
@@ -785,7 +768,6 @@ export class StokvelService {
     return payouts as any[];
   }
 
-  // Get financial summary
   static getFinancialSummary(stokvelId: string, userId: string): any {
     const db = getDb();
     

@@ -3,7 +3,6 @@ import { StokvelService, CreateStokvelInput } from '../services/stokvel.service'
 import { AuthRequest } from '../middleware/auth.middleware';
 
 export class StokvelController {
-  // Create a new stokvel
   async create(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -39,7 +38,6 @@ export class StokvelController {
     }
   }
   
-  // Get all stokvels for the authenticated user
   async getUserStokvels(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -64,7 +62,6 @@ export class StokvelController {
     }
   }
   
-  // Get a single stokvel by ID
   async getById(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -98,7 +95,6 @@ export class StokvelController {
     }
   }
   
-  // Update stokvel
   async update(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -126,7 +122,6 @@ export class StokvelController {
     }
   }
   
-  // Delete stokvel
   async delete(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -147,7 +142,6 @@ export class StokvelController {
     }
   }
 
-  // Clone a stokvel
   async clone(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -178,7 +172,6 @@ export class StokvelController {
     }
   }
 
-  // Add member to stokvel
   async addMember(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -205,7 +198,6 @@ export class StokvelController {
     }
   }
 
-  // Remove member from stokvel
   async removeMember(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -227,7 +219,6 @@ export class StokvelController {
     }
   }
 
-  // Get all members of a stokvel
   async getMembers(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -249,7 +240,6 @@ export class StokvelController {
     }
   }
 
-  // Update member role
   async updateMemberRole(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -276,7 +266,6 @@ export class StokvelController {
     }
   }
 
-  // Add contribution
   async addContribution(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -303,7 +292,6 @@ export class StokvelController {
     }
   }
 
-  // Get all contributions for stokvel
   async getContributions(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -325,7 +313,6 @@ export class StokvelController {
     }
   }
 
-  // Get member contributions
   async getMemberContributions(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -347,7 +334,6 @@ export class StokvelController {
     }
   }
 
-  // Update contribution status
   async updateContributionStatus(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -374,7 +360,6 @@ export class StokvelController {
     }
   }
 
-  // Get next recipient for payout
   async getNextRecipient(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -395,7 +380,6 @@ export class StokvelController {
     }
   }
 
-  // Process payout
   async processPayout(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -417,7 +401,6 @@ export class StokvelController {
     }
   }
 
-  // Get payout history
   async getPayoutHistory(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;
@@ -439,7 +422,6 @@ export class StokvelController {
     }
   }
 
-  // Get financial summary
   async getFinancialSummary(req: AuthRequest, res: Response) {
     try {
       const userId = req.user?.id;

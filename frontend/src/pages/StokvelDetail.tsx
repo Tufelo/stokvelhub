@@ -1,7 +1,44 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { stokvelService } from '../services/stokvel.service';
-import "./Dashboard.css";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  LinearProgress,
+  Grid,
+  Select,
+  FormControl,
+  InputLabel,
+  Paper,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AddIcon from '@mui/icons-material/Add';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import { motion } from 'framer-motion';
+
+const StyledCard = styled(Card)({
+  borderRadius: '16px',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  '&:hover': {
+    boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
+  },
+});
 
 const StokvelDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -137,168 +174,270 @@ const StokvelDetail: React.FC = () => {
     navigate('/dashboard');
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) return <LinearProgress />;
 
   return (
-    <div className="dashboard">
-      <nav className="navbar">
-        <button className="back-button" onClick={goBack}>
-          ← Back
-        </button>
-        <h1>{stokvel?.name}</h1>
-        <div className="placeholder"></div>
-      </nav>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f7fa' }}>
+      <AppBar position="static" elevation={0} sx={{ background: 'white', color: '#333', borderBottom: '1px solid #e0e0e0' }}>
+        <Toolbar>
+          <IconButton onClick={goBack} color="inherit">
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700, color: '#667eea', ml: 1 }}>
+            {stokvel?.name || 'Stokvel Details'}
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-      <div className="dashboard-content">
+      <Box sx={{ maxWidth: '1200px', mx: 'auto', mt: 4, px: 2 }}>
+        {/* Summary Cards */}
         {summary && (
-          <div className="summary-cards">
-            <div className="summary-card">
-              <h3>Total Contributions</h3>
-              <p>R{summary.total_contributions}</p>
-            </div>
-            <div className="summary-card">
-              <h3>Total Payouts</h3>
-              <p>R{summary.total_payouts}</p>
-            </div>
-            <div className="summary-card">
-              <h3>Balance</h3>
-              <p>R{summary.balance}</p>
-            </div>
-            <div className="summary-card">
-              <h3>Members</h3>
-              <p>{members.length}</p>
-            </div>
-          </div>
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <StyledCard>
+                <CardContent>
+                  <Typography color="textSecondary" gutterBottom>Total Contributions</Typography>
+                  <Typography variant="h5" fontWeight="bold" color="#667eea">R{summary.total_contributions}</Typography>
+                </CardContent>
+              </StyledCard>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StyledCard>
+                <CardContent>
+                  <Typography color="textSecondary" gutterBottom>Total Payouts</Typography>
+                  <Typography variant="h5" fontWeight="bold" color="#764ba2">R{summary.total_payouts}</Typography>
+                </CardContent>
+              </StyledCard>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StyledCard>
+                <CardContent>
+                  <Typography color="textSecondary" gutterBottom>Balance</Typography>
+                  <Typography variant="h5" fontWeight="bold" color={summary.balance >= 0 ? '#48bb78' : '#e53e3e'}>
+                    R{summary.balance}
+                  </Typography>
+                </CardContent>
+              </StyledCard>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StyledCard>
+                <CardContent>
+                  <Typography color="textSecondary" gutterBottom>Members</Typography>
+                  <Typography variant="h5" fontWeight="bold" color="#667eea">{members.length}</Typography>
+                </CardContent>
+              </StyledCard>
+            </Grid>
+          </Grid>
         )}
 
+        {/* Next Recipient */}
         {nextRecipient && (
-          <div className="next-recipient">
-            <h3>🎯 Next Payout Recipient</h3>
-            <p><strong>{nextRecipient.recipient?.email}</strong></p>
-            <p>Amount: R{nextRecipient.expected_payout} | Cycle: {nextRecipient.cycle_number}</p>
-            <button className="btn-primary" onClick={handleProcessPayout}>
-              Process Payout
-            </button>
-          </div>
+          <Paper sx={{ p: 3, mb: 4, bgcolor: '#f3e8ff', borderRadius: '12px' }}>
+            <Typography variant="h6" fontWeight="600" color="#764ba2">🎯 Next Payout Recipient</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mt: 1 }}>
+              <Typography variant="body1" fontWeight="500">{nextRecipient.recipient?.email}</Typography>
+              <Chip label={`Cycle ${nextRecipient.cycle_number}`} size="small" sx={{ bgcolor: '#667eea', color: 'white' }} />
+              <Chip label={`R${nextRecipient.expected_payout}`} size="small" sx={{ bgcolor: '#764ba2', color: 'white' }} />
+              <Button variant="contained" onClick={handleProcessPayout} sx={{ ml: 'auto' }}>
+                Process Payout
+              </Button>
+            </Box>
+          </Paper>
         )}
 
-        <div className="tabs">
-          <button className={activeTab === 'members' ? 'tab-active' : 'tab'} onClick={() => setActiveTab('members')}>
+        {/* Tabs */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, borderBottom: '2px solid #e0e0e0' }}>
+          <Button
+            onClick={() => setActiveTab('members')}
+            sx={{
+              py: 1.5,
+              px: 3,
+              color: activeTab === 'members' ? '#667eea' : '#666',
+              borderBottom: activeTab === 'members' ? '2px solid #667eea' : 'none',
+              borderRadius: 0,
+              fontWeight: activeTab === 'members' ? 600 : 400,
+            }}
+          >
             Members ({members.length})
-          </button>
-          <button className={activeTab === 'contributions' ? 'tab-active' : 'tab'} onClick={() => setActiveTab('contributions')}>
+          </Button>
+          <Button
+            onClick={() => setActiveTab('contributions')}
+            sx={{
+              py: 1.5,
+              px: 3,
+              color: activeTab === 'contributions' ? '#667eea' : '#666',
+              borderBottom: activeTab === 'contributions' ? '2px solid #667eea' : 'none',
+              borderRadius: 0,
+              fontWeight: activeTab === 'contributions' ? 600 : 400,
+            }}
+          >
             Contributions
-          </button>
-        </div>
+          </Button>
+        </Box>
 
+        {/* Members Tab */}
         {activeTab === 'members' && (
-          <div>
-            <div className="header">
-              <h2>Members</h2>
-              <button className="btn-primary" onClick={() => setShowAddMember(true)}>
-                + Add Member
-              </button>
-            </div>
-            <div className="members-list">
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" fontWeight="600">Members</Typography>
+              <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowAddMember(true)}>
+                Add Member
+              </Button>
+            </Box>
+            <Grid container spacing={2}>
               {members.map((member) => (
-                <div key={member.id} className="member-card">
-                  <div className="member-info">
-                    <strong>{member.email}</strong>
-                    <span className={`role-badge role-${member.member_role.toLowerCase()}`}>
-                      {member.member_role}
-                    </span>
-                    <small>Joined: {new Date(member.joined_at).toLocaleDateString()}</small>
-                  </div>
-                  {member.member_role !== 'FOUNDER' && (
-                    <button className="danger-small" onClick={() => handleRemoveMember(member.id)}>
-                      Remove
-                    </button>
-                  )}
-                </div>
+                <Grid item xs={12} sm={6} md={4} key={member.id}>
+                  <StyledCard>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box>
+                          <Typography variant="subtitle1" fontWeight="600">{member.email}</Typography>
+                          <Chip
+                            label={member.member_role}
+                            size="small"
+                            sx={{
+                              mt: 0.5,
+                              bgcolor: member.member_role === 'FOUNDER' ? '#ffd700' : 
+                                       member.member_role === 'ADMIN' ? '#667eea' : 
+                                       member.member_role === 'TREASURER' ? '#48bb78' : '#e2e8f0',
+                              color: member.member_role === 'FOUNDER' ? '#333' : 'white',
+                            }}
+                          />
+                          <Typography variant="caption" display="block" color="textSecondary" sx={{ mt: 0.5 }}>
+                            Joined: {new Date(member.joined_at).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                        {member.member_role !== 'FOUNDER' && (
+                          <IconButton size="small" color="error" onClick={() => handleRemoveMember(member.id)}>
+                            <PersonRemoveIcon />
+                          </IconButton>
+                        )}
+                      </Box>
+                    </CardContent>
+                  </StyledCard>
+                </Grid>
               ))}
-            </div>
-          </div>
+            </Grid>
+          </Box>
         )}
 
+        {/* Contributions Tab */}
         {activeTab === 'contributions' && (
-          <div>
-            <div className="header">
-              <h2>Contributions</h2>
-              <button className="btn-primary" onClick={() => setShowAddContribution(true)}>
-                + Record Contribution
-              </button>
-            </div>
-            <div className="contributions-list">
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" fontWeight="600">Contributions</Typography>
+              <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowAddContribution(true)}>
+                Record Contribution
+              </Button>
+            </Box>
+            <Grid container spacing={2}>
               {contributions.map((contribution) => (
-                <div key={contribution.id} className="contribution-card">
-                  <div className="contribution-info">
-                    <strong>{contribution.member_email}</strong>
-                    <span className={`status-badge status-${contribution.status.toLowerCase()}`}>
-                      {contribution.status}
-                    </span>
-                    <span>Amount: R{contribution.amount}</span>
-                    <small>Due: {new Date(contribution.due_date).toLocaleDateString()}</small>
-                  </div>
-                </div>
+                <Grid item xs={12} key={contribution.id}>
+                  <StyledCard>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                        <Typography variant="subtitle1" fontWeight="500">{contribution.member_email}</Typography>
+                        <Chip
+                          label={contribution.status}
+                          size="small"
+                          sx={{
+                            bgcolor: contribution.status === 'PAID' ? '#48bb78' :
+                                     contribution.status === 'PENDING' ? '#ed8936' : '#ecc94b',
+                            color: 'white',
+                          }}
+                        />
+                        <Typography variant="body2">Amount: <strong>R{contribution.amount}</strong></Typography>
+                        <Typography variant="body2">Due: {new Date(contribution.due_date).toLocaleDateString()}</Typography>
+                        {contribution.paid_at && (
+                          <Typography variant="caption" color="textSecondary">
+                            Paid: {new Date(contribution.paid_at).toLocaleDateString()}
+                          </Typography>
+                        )}
+                      </Box>
+                    </CardContent>
+                  </StyledCard>
+                </Grid>
               ))}
-            </div>
-          </div>
+            </Grid>
+          </Box>
         )}
-      </div>
+      </Box>
 
-      {showAddMember && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Add Member</h3>
-            <input
-              type="email"
-              placeholder="Member Email"
-              value={newMemberEmail}
-              onChange={(e) => setNewMemberEmail(e.target.value)}
-            />
-            <select title="Member Role" value={newMemberRole} onChange={(e) => setNewMemberRole(e.target.value)}>
-              <option value="MEMBER">Member</option>
-              <option value="ADMIN">Admin</option>
-              <option value="TREASURER">Treasurer</option>
-            </select>
-            <div className="modal-actions">
-              <button onClick={handleAddMember}>Add</button>
-              <button className="secondary" onClick={() => setShowAddMember(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Add Member Modal */}
+      <Dialog open={showAddMember} onClose={() => setShowAddMember(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Member</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Member Email"
+            type="email"
+            fullWidth
+            value={newMemberEmail}
+            onChange={(e) => setNewMemberEmail(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <FormControl fullWidth>
+            <InputLabel>Role</InputLabel>
+            <Select
+              value={newMemberRole}
+              label="Role"
+              onChange={(e) => setNewMemberRole(e.target.value)}
+            >
+              <MenuItem value="MEMBER">Member</MenuItem>
+              <MenuItem value="ADMIN">Admin</MenuItem>
+              <MenuItem value="TREASURER">Treasurer</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setShowAddMember(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleAddMember}>Add</Button>
+        </DialogActions>
+      </Dialog>
 
-      {showAddContribution && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Record Contribution</h3>
-            <select title="Select Member" value={selectedMemberId} onChange={(e) => setSelectedMemberId(e.target.value)}>
-              <option value="">Select Member</option>
+      {/* Add Contribution Modal */}
+      <Dialog open={showAddContribution} onClose={() => setShowAddContribution(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Record Contribution</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Member</InputLabel>
+            <Select
+              value={selectedMemberId}
+              label="Member"
+              onChange={(e) => setSelectedMemberId(e.target.value)}
+            >
+              <MenuItem value="">Select Member</MenuItem>
               {members.map((member) => (
-                <option key={member.id} value={member.id}>{member.email}</option>
+                <MenuItem key={member.id} value={member.id}>{member.email}</MenuItem>
               ))}
-            </select>
-            <input
-              type="number"
-              placeholder="Amount (R)"
-              value={contributionAmount}
-              onChange={(e) => setContributionAmount(Number(e.target.value))}
-            />
-            <input
-              type="date"
-              placeholder="Due Date"
-              value={contributionDueDate}
-              onChange={(e) => setContributionDueDate(e.target.value)}
-            />
-            <div className="modal-actions">
-              <button onClick={handleAddContribution}>Record</button>
-              <button className="secondary" onClick={() => setShowAddContribution(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label="Amount (R)"
+            type="number"
+            fullWidth
+            value={contributionAmount}
+            onChange={(e) => setContributionAmount(Number(e.target.value))}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            label="Due Date"
+            type="date"
+            fullWidth
+            value={contributionDueDate}
+            onChange={(e) => setContributionDueDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setShowAddContribution(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleAddContribution}>Add</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

@@ -1,13 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { stokvelService, Stokvel } from '../services/stokvel.service';
-import './Dashboard.css';
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Paper,
+  LinearProgress,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import AddIcon from '@mui/icons-material/Add';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { motion } from 'framer-motion';
+
+const StyledCard = styled(Card)({
+  borderRadius: '16px',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
+  },
+});
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [stokvels, setStokvels] = useState<Stokvel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [newStokvel, setNewStokvel] = useState({ name: '', description: '', contributionAmount: 100 });
 
   useEffect(() => {
@@ -25,14 +62,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleCreateStokvel = async () => {
+  const handleCreate = async () => {
     try {
       await stokvelService.create(
         newStokvel.name,
         newStokvel.description,
         { contributionAmount: newStokvel.contributionAmount, contributionFrequency: 'monthly', maxMembers: 50 }
       );
-      setShowCreateModal(false);
+      setOpen(false);
       setNewStokvel({ name: '', description: '', contributionAmount: 100 });
       loadStokvels();
     } catch (error) {
@@ -62,86 +99,205 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleClose();
+    logout();
+  };
+
   const navigateToStokvel = (id: string) => {
     window.location.href = `/stokvel/${id}`;
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) {
+    return (
+      <Box sx={{ width: '100%', mt: 4 }}>
+        <LinearProgress />
+      </Box>
+    );
+  }
 
   return (
-    <div className="dashboard">
-      <nav className="navbar">
-        <h1>StokvelHub</h1>
-        <div className="user-info">
-          <span>{user?.email}</span>
-          <button onClick={logout}>Logout</button>
-        </div>
-      </nav>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f7fa' }}>
+      <AppBar position="static" elevation={0} sx={{ background: 'white', color: '#333', borderBottom: '1px solid #e0e0e0' }}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700, color: '#667eea' }}>
+            StokvelHub
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2" color="textSecondary">
+              {user?.email}
+            </Typography>
+            <IconButton onClick={handleMenu} color="inherit">
+              <Avatar sx={{ bgcolor: '#667eea', width: 32, height: 32 }}>
+                {user?.email?.[0]?.toUpperCase() || 'U'}
+              </Avatar>
+            </IconButton>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
-      <div className="dashboard-content">
-        <div className="header">
-          <h2>My Stokvels</h2>
-          <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
-            + Create Stokvel
-          </button>
-        </div>
+      <Box sx={{ maxWidth: '1200px', mx: 'auto', mt: 4, px: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#333' }}>
+            My Stokvels
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setOpen(true)}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              borderRadius: '12px',
+              px: 3,
+              py: 1,
+              fontWeight: 600,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a67d8 0%, #6b42a3 100%)',
+              },
+            }}
+          >
+            Create Stokvel
+          </Button>
+        </Box>
 
-        <div className="stokvel-grid">
-          {stokvels.map((stokvel) => (
-            <div key={stokvel.id} className="stokvel-card">
-              <h3>{stokvel.name}</h3>
-              <p>{stokvel.description || 'No description'}</p>
-              <div className="stokvel-stats">
-                <span>👥 {stokvel.member_count} members</span>
-                <span>💰 R{stokvel.settings?.contributionAmount || 0}/month</span>
-              </div>
-              <div className="stokvel-actions">
-                <button onClick={() => navigateToStokvel(stokvel.id)}>View</button>
-                <button onClick={() => handleClone(stokvel.id)}>Clone</button>
-                <button className="danger" onClick={() => handleDelete(stokvel.id)}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {stokvels.length === 0 && (
-          <div className="empty-state">
-            <p>No stokvels yet. Create your first one!</p>
-          </div>
+        {stokvels.length === 0 ? (
+          <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '16px' }}>
+            <Typography variant="h6" color="textSecondary">No stokvels yet</Typography>
+            <Typography variant="body2" color="textSecondary" mt={1}>
+              Create your first stokvel to get started!
+            </Typography>
+          </Paper>
+        ) : (
+          <Grid container spacing={3}>
+            {stokvels.map((stokvel, index) => (
+              <Grid item xs={12} md={6} lg={4} key={stokvel.id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <StyledCard>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
+                        {stokvel.name}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary" sx={{ mb: 2, minHeight: '40px' }}>
+                        {stokvel.description || 'No description'}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                        <Chip
+                          label={`👥 ${stokvel.member_count} members`}
+                          size="small"
+                          sx={{ bgcolor: '#e8eaf6', color: '#667eea' }}
+                        />
+                        <Chip
+                          label={`💰 R${stokvel.settings?.contributionAmount || 0}`}
+                          size="small"
+                          sx={{ bgcolor: '#f3e8ff', color: '#764ba2' }}
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<VisibilityIcon />}
+                          onClick={() => navigateToStokvel(stokvel.id)}
+                          sx={{ borderRadius: '8px', color: '#667eea', borderColor: '#667eea' }}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<ContentCopyIcon />}
+                          onClick={() => handleClone(stokvel.id)}
+                          sx={{ borderRadius: '8px', color: '#764ba2', borderColor: '#764ba2' }}
+                        >
+                          Clone
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleDelete(stokvel.id)}
+                          sx={{ borderRadius: '8px', color: '#e53e3e', borderColor: '#e53e3e' }}
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </StyledCard>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
         )}
-      </div>
+      </Box>
 
-      {showCreateModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Create Stokvel</h3>
-            <input
-              type="text"
-              placeholder="Name"
-              value={newStokvel.name}
-              onChange={(e) => setNewStokvel({ ...newStokvel, name: e.target.value })}
-            />
-            <textarea
-              placeholder="Description"
-              value={newStokvel.description}
-              onChange={(e) => setNewStokvel({ ...newStokvel, description: e.target.value })}
-            />
-            <input
-              type="number"
-              placeholder="Monthly Contribution (R)"
-              value={newStokvel.contributionAmount}
-              onChange={(e) => setNewStokvel({ ...newStokvel, contributionAmount: Number(e.target.value) })}
-            />
-            <div className="modal-actions">
-              <button onClick={handleCreateStokvel}>Create</button>
-              <button className="secondary" onClick={() => setShowCreateModal(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, color: '#333' }}>Create New Stokvel</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Stokvel Name"
+            fullWidth
+            variant="outlined"
+            value={newStokvel.name}
+            onChange={(e) => setNewStokvel({ ...newStokvel, name: e.target.value })}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            fullWidth
+            multiline
+            rows={3}
+            variant="outlined"
+            value={newStokvel.description}
+            onChange={(e) => setNewStokvel({ ...newStokvel, description: e.target.value })}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            label="Monthly Contribution (R)"
+            type="number"
+            fullWidth
+            variant="outlined"
+            value={newStokvel.contributionAmount}
+            onChange={(e) => setNewStokvel({ ...newStokvel, contributionAmount: Number(e.target.value) })}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setOpen(false)} sx={{ color: '#666' }}>Cancel</Button>
+          <Button
+            onClick={handleCreate}
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a67d8 0%, #6b42a3 100%)',
+              },
+            }}
+          >
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

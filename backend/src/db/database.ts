@@ -102,10 +102,8 @@ export function getDb() {
   return db;
 }
 
-// Close database (call this when app shuts down)
+// Close database
 export function closeDatabase() {
   db.close();
   console.log('✅ Database connection closed');
 }
-
-// No auto-initialization here - let app.ts call it explicitly
